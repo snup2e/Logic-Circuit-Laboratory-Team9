@@ -1,5 +1,23 @@
 `timescale 1ns / 1ps
-
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: 
+// 
+// Create Date: 2025/07/06 18:29:43
+// Design Name: 
+// Module Name: controller
+// Project Name: 
+// Target Devices: 
+// Tool Versions: 
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
 
 
 module controller(
@@ -13,8 +31,8 @@ output reg [7:0] A_PE, W_PE, // PE에 넣을 값
 output reg [7:0] A1_3by3, A2_3by3, A3_3by3, W1_3by3, W2_3by3, W3_3by3, // 3by3_sa 에 넣을 값
 output reg [7:0] A1_2by2, A2_2by2, W1_2by2, W2_2by2, // 2by2_sa 에 넣을 값
 output reg C11_PE, C12_PE, C21_PE, C22_PE,// PE 결과 저장 신호
-output reg C11_3by3, C12_3by3, C21_3by3, C22_3by3,// PE 결과 저장 신호
-output reg C11_2by2, C12_2by2, C21_2by2, C22_2by2 // PE 결과 저장 신호
+output reg C11_3by3, C12_3by3, C21_3by3, C22_3by3,// 3by3 결과 저장 신호
+output reg C11_2by2, C12_2by2, C21_2by2, C22_2by2 // 2by2 결과 저장 신호
     );
 
     reg [2:0] state; // 상태
@@ -81,10 +99,11 @@ output reg C11_2by2, C12_2by2, C21_2by2, C22_2by2 // PE 결과 저장 신호
                 rst_PE <= 1;
                 rst_3by3 <= 1;
                 rst_2by2 <= 1;
+                rst_display <= 1;
             end
             computation_PE : begin // S2 PE 계산 시퀀스 보내기
                 case (cnt_PE)
-                0 : begin rst_PE <= 0; on_PE <= 1; end
+                0 : begin rst_memory <= 0; rst_PE <= 0; on_PE <= 1; end
                 1 : begin A_PE <= a11 ; W_PE <= b33; end
                 2 : begin A_PE <= a12 ; W_PE <= b32; end
                 3 : begin A_PE <= a13 ; W_PE <= b31; end
@@ -94,7 +113,7 @@ output reg C11_2by2, C12_2by2, C21_2by2, C22_2by2 // PE 결과 저장 신호
                 7 : begin A_PE <= a31 ; W_PE <= b13; end
                 8 : begin A_PE <= a32 ; W_PE <= b12; end
                 9 : begin A_PE <= a33 ; W_PE <= b11; end
-               10 : begin C11_PE <= 1; end
+               10 : begin A_PE <= 0 ; W_PE <= 0; C11_PE <= 1; end
                11 : begin C11_PE <= 0; rst_PE <= 1; end
                
                12 : begin rst_PE <= 0; end
@@ -107,7 +126,7 @@ output reg C11_2by2, C12_2by2, C21_2by2, C22_2by2 // PE 결과 저장 신호
                19 : begin A_PE <= a32 ; W_PE <= b13; end
                20 : begin A_PE <= a33 ; W_PE <= b12; end
                21 : begin A_PE <= a34 ; W_PE <= b11; end
-               22 : begin C12_PE <= 1; end
+               22 : begin A_PE <= 0 ; W_PE <= 0; C12_PE <= 1; end
                23 : begin C12_PE <= 0; rst_PE <= 1; end
                
                24 : begin rst_PE <= 0; end
@@ -120,7 +139,7 @@ output reg C11_2by2, C12_2by2, C21_2by2, C22_2by2 // PE 결과 저장 신호
                31 : begin A_PE <= a41 ; W_PE <= b13; end
                32 : begin A_PE <= a42 ; W_PE <= b12; end
                33 : begin A_PE <= a43 ; W_PE <= b11; end
-               34 : begin C21_PE <= 1; end
+               34 : begin A_PE <= 0 ; W_PE <= 0; C21_PE <= 1; end
                35 : begin C21_PE <= 0; rst_PE <= 1; end
               
                36 : begin rst_PE <= 0; end
@@ -133,47 +152,24 @@ output reg C11_2by2, C12_2by2, C21_2by2, C22_2by2 // PE 결과 저장 신호
                43 : begin A_PE <= a42 ; W_PE <= b13; end
                44 : begin A_PE <= a43 ; W_PE <= b12; end
                45 : begin A_PE <= a44 ; W_PE <= b11; end
-               46 : begin C22_PE <= 1; end
+               46 : begin A_PE <= 0 ; W_PE <= 0; C22_PE <= 1; end
                47 : begin C22_PE <= 0; rst_PE <= 1; on_PE <= 0; end           
                 endcase
             end
             computation_3by3_sa : begin // S3 3by3 sa 계산 시퀀스 보내기 (시퀀스는 수정해야함)
                 case (cnt_3by3)
                 0 : begin rst_3by3 <= 0; on_PE <= 1; on_3by3 <=1; end
-                1 : begin A1_3by3 <= a11; A2_3by3 <= 0; A3_3by3 <= 0; W1_3by3 <= b33; W2_3by3 <= 0; W3_3by3 <= 0; end
-                2 : begin A1_3by3 <= a12; A2_3by3 <= a21; A3_3by3 <= 0; W1_3by3 <= b32; W2_3by3 <= b23; W3_3by3 <= 0; end
-                3 : begin A1_3by3 <= a13; A2_3by3 <= a22; A3_3by3 <= a31; W1_3by3 <= b31; W2_3by3 <= b22; W3_3by3 <= b13; end
-                4 : begin A1_3by3 <= 0; A2_3by3 <= a23; A3_3by3 <= a32; W1_3by3 <= 0; W2_3by3 <= b21; W3_3by3 <= b12; end
-                5 : begin A1_3by3 <= 0; A2_3by3 <= 0; A3_3by3 <= a33; W1_3by3 <= 0; W2_3by3 <= 0; W3_3by3 <= b11; end
-                6 : begin C11_3by3 <= 1; end
-                7 : begin C11_3by3 <= 0; rst_3by3 <= 1; end
-                
-                8 : begin rst_3by3 <= 0; on_PE <= 1; on_3by3 <=1; end
-                9 : begin A1_3by3 <= a12; A2_3by3 <= 0; A3_3by3 <= 0; W1_3by3 <= b33; W2_3by3 <= 0; W3_3by3 <= 0; end
-               10 : begin A1_3by3 <= a13; A2_3by3 <= a22; A3_3by3 <= 0; W1_3by3 <= b32; W2_3by3 <= b23; W3_3by3 <= 0; end
-               11 : begin A1_3by3 <= a14; A2_3by3 <= a23; A3_3by3 <= a32; W1_3by3 <= b31; W2_3by3 <= b22; W3_3by3 <= b13; end
-               12 : begin A1_3by3 <= 0; A2_3by3 <= a24; A3_3by3 <= a33; W1_3by3 <= 0; W2_3by3 <= b21; W3_3by3 <= b12; end
-               13 : begin A1_3by3 <= 0; A2_3by3 <= 0; A3_3by3 <= a34; W1_3by3 <= 0; W2_3by3 <= 0; W3_3by3 <= b11; end
-               14 : begin C12_3by3 <= 1; end
-               15 : begin C12_3by3 <= 0; rst_3by3 <= 1; end
-                
-               16 : begin rst_3by3 <= 0; on_PE <= 1; on_3by3 <=1; end
-               17 : begin A1_3by3 <= a21; A2_3by3 <= 0; A3_3by3 <= 0; W1_3by3 <= b33; W2_3by3 <= 0; W3_3by3 <= 0; end
-               18 : begin A1_3by3 <= a22; A2_3by3 <= a31; A3_3by3 <= 0; W1_3by3 <= b32; W2_3by3 <= b23; W3_3by3 <= 0; end
-               19 : begin A1_3by3 <= a23; A2_3by3 <= a32; A3_3by3 <= a41; W1_3by3 <= b31; W2_3by3 <= b22; W3_3by3 <= b13; end
-               20 : begin A1_3by3 <= 0; A2_3by3 <= a33; A3_3by3 <= a42; W1_3by3 <= 0; W2_3by3 <= b21; W3_3by3 <= b12; end
-               21 : begin A1_3by3 <= 0; A2_3by3 <= 0; A3_3by3 <= a43; W1_3by3 <= 0; W2_3by3 <= 0; W3_3by3 <= b11; end
-               22 : begin C21_3by3 <= 1; end
-               23 : begin C21_3by3 <= 0; rst_3by3 <= 1; end
-                
-               24 : begin rst_3by3 <= 0; on_PE <= 1; on_3by3 <=1; end
-               25 : begin A1_3by3 <= a22; A2_3by3 <= 0; A3_3by3 <= 0; W1_3by3 <= b33; W2_3by3 <= 0; W3_3by3 <= 0; end
-               26 : begin A1_3by3 <= a23; A2_3by3 <= a32; A3_3by3 <= 0; W1_3by3 <= b32; W2_3by3 <= b23; W3_3by3 <= 0; end
-               27 : begin A1_3by3 <= a24; A2_3by3 <= a33; A3_3by3 <= a42; W1_3by3 <= b31; W2_3by3 <= b22; W3_3by3 <= b13; end
-               28 : begin A1_3by3 <= 0; A2_3by3 <= a34; A3_3by3 <= a43; W1_3by3 <= 0; W2_3by3 <= b21; W3_3by3 <= b12; end
-               29 : begin A1_3by3 <= 0; A2_3by3 <= 0; A3_3by3 <= a44; W1_3by3 <= 0; W2_3by3 <= 0; W3_3by3 <= b11; end
-               30 : begin C22_3by3 <= 1; end
-               31 : begin C22_3by3 <= 0; rst_3by3 <= 1; on_PE <= 0; on_3by3 <=0; end                                                
+                1 : begin A1_3by3 <= a24; A2_3by3 <= 0; A3_3by3 <= 0; end
+                2 : begin A1_3by3 <= a23; A2_3by3 <= a34; A3_3by3 <= 0; end
+                3 : begin A1_3by3 <= a22; A2_3by3 <= a33; A3_3by3 <= a44; end
+                4 : begin A1_3by3 <= a21; A2_3by3 <= a32; A3_3by3 <= a43; end
+                5 : begin A1_3by3 <= a14; A2_3by3 <= a31; A3_3by3 <= a42; C22_3by3 <= 1; end
+                6 : begin A1_3by3 <= a13; A2_3by3 <= a24; A3_3by3 <= a41; C21_3by3 <= 1; C22_3by3 <= 0; end
+                7 : begin A1_3by3 <= a12; A2_3by3 <= a23; A3_3by3 <= a34; C21_3by3 <= 0; end
+                8 : begin A1_3by3 <= a11; A2_3by3 <= a22; A3_3by3 <= a31; end
+                9 : begin A1_3by3 <= 0; A2_3by3 <= a21; A3_3by3 <= a32; C12_3by3 <= 1; end
+               10 : begin A1_3by3 <= 0; A2_3by3 <= 0; A3_3by3 <= a31; C11_3by3 <= 1; C12_3by3 <= 0; end   
+               11 : begin rst_3by3 <= 1; on_PE <= 0; on_3by3 <=0; C11_3by3 <= 0; end                                           
                 endcase
             end
             computation_2by2_sa : begin // S4 2by2 sa 계산 시퀀스 보내기 (시퀀스는 수정해야함)
@@ -184,7 +180,7 @@ output reg C11_2by2, C12_2by2, C21_2by2, C22_2by2 // PE 결과 저장 신호
                 3 : begin A1_2by2 <= 0; A2_2by2 <= 0; W1_3by3 <= 0; W2_3by3 <= 0; end
                 4 : begin A1_2by2 <= 0; A2_2by2 <= 0; W1_3by3 <= 0; W2_3by3 <= 0; end
                 5 : begin A1_2by2 <= 0; A2_2by2 <= 0; W1_3by3 <= 0; W2_3by3 <= 0; end
-                7 : begin C11_2by2 <= 0; rst_2by2 <= 1; end
+                7 : begin A1_2by2 <= 0; A2_2by2 <= 0; W1_3by3 <= 0; W2_3by3 <= 0; C11_2by2 <= 0; rst_2by2 <= 1; end
                 endcase
             end
             display : begin // S5 display 모듈 작동 신호 보내기
